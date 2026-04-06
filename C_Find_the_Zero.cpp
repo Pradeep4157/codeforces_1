@@ -36,24 +36,21 @@ signed main()
         cin >> n;
         int size = n * 2ll;
         int res = -1;
-        for (int i = 1; i <= n; i++)
+        for (int i = 1; i < size - 1; i += 2)
         {
-            int first = size;
-            int second = i;
-            bool curr = query(first, second);
+            bool curr = query(i, i + 1);
             if (curr == 1)
             {
-                res = first;
+                res = i;
                 break;
             }
         }
         if (res == -1)
         {
-            bool curr = query(size, n + 1);
-            if (curr == 1)
-                res = n + 1;
-            else
-                res = n + 2;
+            // either last 2 pairs are 10,10 or 11,00
+            // the last first pair is already checked they are not equal..
+            // only so it is def 10 or 11 so if 10,00 is the case then i check first with both if not then second one is answer
+            // if 11,00 in this case just choosing second wont work..
         }
         cout << "! " << res << endl;
     }
