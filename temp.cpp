@@ -4,57 +4,35 @@ using namespace std;
 /*
         OBSERVATIONS:
 
-    for every y we can bs..
+    upper limit is that i make
 
+    all the elemnets diff.
 
-    now x and y both vary..
+    i have to keep track of
 
-    we cant even precomp because y vary..
+    last change that i made
 
-    so before processing all these queries
+    if this current ele's prev
 
-    i think that if this is the end what worst
+    freq is after that change
 
-    is it giving me ?
+    and there is no ele in between
 
+    that is unique in the whole
 
-    if y is too large wouldnt the window be
+    array then i will have to change
 
-    really small because of a lot of left values
+    this
 
-    incapable ?
+    this can be optimized using
 
+    lower bounds..
 
-    if y is small then window is big but for that thing
+    else i will either change
 
-    the window size will be really small ?
+    and move else i will not change
 
-    so what if we precomp values for these small sums
-
-    and brute force for large sums ?
-
-
-    so we store sums till root n ?
-
-    but does it have any relation with the size of array ?
-
-    no we will store till root sum of array ..
-
-    and if y > root sum of array, then  we will
-
-    find that manually..
-
-    should we precomp till root of sum
-
-    or root of max y..
-
-    we will try both..
-
-
-
-    if y is 1e9 precomp will go till 1e9
-
-    so better if we use sum sqrt..
+    and move..
 
 
 
@@ -62,33 +40,65 @@ using namespace std;
 
 
 */
+vector<vector<int>> dp;
+int n;
+vector<int> arr;
+set<int> st;
+int recursion(int i, int prev_change)
+{
+    if (i == n + 1)
+        return 0;
+    // either i have to change..
+    bool ok = 1;
+    if (dp[i][prev_change] != -1)
+        return dp[i][prev_change];
+    for (int j = i - 1; j >= 0; j--)
+    {
+        if (j <= prev_change || st.count(arr[j]))
+            break;
+        if (arr[i] == arr[j])
+        {
+            ok = false;
+            break;
+        }
+    }
+    int res = LLONG_MAX;
+    if (ok)
+    {
+        // we can skip this index..
+        res = recursion(i + 1, prev_change);
+    }
+    res = min(res, 1 + recursion(i + 1, i));
+    return dp[i][prev_change] = res;
+}
 signed main()
 {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
-    int n, q;
-    cin >> n >> q;
-    vector<int> arr(n);
-    vector<int> prefix(n);
-    for (int i = 0; i < n; i++)
+    int t;
+    cin >> t;
+    while (t--)
     {
-        cin >> arr[i];
-        sum += arr[i];
-        prefix[i] = sum;
-    }
-    int lim = sqrt(sum);
-    vector<vector<int>> dp(n, vector<int>(lim + 1, 0));
-    for (int i = 0; i < n; i++)
-    {
-        int curr_lim = min(lim, prefix[i]);
-        for (int j = 1; j <= curr_lim; j++)
+        cin >> n;
+        arr.clear();
+        arr.resize(n + 1);
+        map<int, int> mp;
+        st.clear();
+        for (int i = 1; i <= n; i++)
         {
-            auto it = lower_bound(prefix.begin(),prefix.end(),prefix[i] - j);
-            int index = it - prefix.begin();
-            dp[i][j] = i - index + 1;
-            if(i) dp[i][j] = max(dp[i][j],dp[i - 1][j]);
+            cin >> arr[i];
+            mp[arr[i]]++;
         }
+        for (auto a : mp)
+        {
+            if (a.second == 1)
+            {
+                st.insert(a.first);
+            }
+        }
+        dp.assign(n + 2, vector<int>(n + 2, -1));
+        int res = recursion(1, 0);
+        cout << res << endl;
     }
-
     return 0;
 }
