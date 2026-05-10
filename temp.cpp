@@ -6,6 +6,27 @@ using namespace std;
 
 
 */
+bool possible(int mid, vector<int> &arr, vector<int> &b)
+{
+    int n = arr.size();
+    int curr_time = 0;
+    int temp = mid;
+    int req = 1;
+    for (int i = 0; i < n; i++)
+    {
+
+        curr_time += arr[i];
+        if (curr_time <= b[i])
+            continue;
+        else
+        {
+            curr_time = b[i];
+            req++;
+        }
+    }
+
+    return (mid >= req);
+}
 signed main()
 {
     ios::sync_with_stdio(false);
@@ -16,58 +37,28 @@ signed main()
     {
         int n;
         cin >> n;
-        string s, t;
-        cin >> s >> t;
-        int curr = 0;
-        vector<int> suffix(n, 0);
+        vector<int> arr(n), b(n);
+        for (int i = 0; i < n; i++)
+            cin >> arr[i];
+        for (int i = 0; i < n; i++)
+            cin >> b[i];
+        set<int> st;
+        int res = 0;
         for (int i = n - 1; i >= 0; i--)
         {
-            if (s[i] == t[i])
-                curr++;
-            suffix[i] = curr;
-        }
-        curr = 0;
-        bool found = false;
-        if (suffix[0] == n)
-        {
-            cout << "Yes" << endl;
-            cout << 0 << endl;
-            continue;
-        }
-        int index = -1;
-        for (int i = 0; i < n; i++)
-        {
-            if (s[i] == '1' && (s[i] != t[i]))
+            auto it = st.lower_bound(b[i]);
+            if (it == st.end())
             {
-                int prev = i;
-                int next = n - i - 1;
-                if (next)
-                {
-                    if (suffix[i] < next)
-                        continue;
-                }
-                // next all are same..
-                // now prev all should be diff.
-                if (prev != curr)
-                {
-                    continue;
-                }
-                index = i;
-                break;
+                res++;
+                st.insert(b[i]);
             }
-            if (s[i] != t[i])
-                curr++;
+            else
+            {
+                st.erase(it);
+                st.insert(b[i]);
+            }
         }
-        if (index == -1)
-        {
-            cout << "No" << endl;
-        }
-        else
-        {
-            cout << "Yes" << endl;
-            cout << 1 << endl;
-            cout << index << endl;
-        }
+        cout << res << endl;
     }
     return 0;
 }

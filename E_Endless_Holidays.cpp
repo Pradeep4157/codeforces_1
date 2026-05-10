@@ -75,11 +75,7 @@ signed main()
         {
             if (dp[i][0].empty())
                 continue;
-            cout << holidays[i][0] << "___" << endl;
-            cout << i << "->";
-            for (auto a : dp[i][0])
-                cout << a << " ";
-            cout << endl;
+            
             // we have reached here from some end..
             for (auto &end : dp[i][0])
             {
