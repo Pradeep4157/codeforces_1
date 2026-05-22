@@ -1,0 +1,210 @@
+#include <bits/stdc++.h>
+#define int long long
+using namespace std;
+/*
+        OBSERVATIONS:
+
+
+    so s[i] is that whether we remember the value or not..
+
+    and we need to find arr
+
+    and we are also given prefix max from 0...i
+
+    now i am at some index..
+
+    lets say that i have found everything from 0..i - 1
+
+    if i == 0 is  not found then it is literally c[0]
+
+    now for i = 1..n
+
+    i know all the prev values, along with that i will also
+
+    have the prefix sum till i - 1..
+
+    now if c[i] > prefix sum till i - 1..
+
+    then this value should be :  arr[i] = c[i] - prefix_sum..
+
+    else this is some -ve value or maybe 0:
+
+    so no cases are :
+
+        arr[0] is defined and arr[0] != c[0]
+
+        the c array should be non decreasing..
+
+
+    i will try to fill all the zeroes with 0 only..
+
+    now at some point i will have a value because of which
+
+    i will have to change some prev zero with this.
+
+    now if i dont have zeroes at this point then also false..
+
+    -4,-4,-1,-1
+    0,0,0,5
+    -4,0,3,5
+
+    so at some point c[i] wont match the prefix till now .
+
+    so i will calc the diff..
+
+    -1,4
+    4 + x = -1
+    x = c[i] - prefix[i]
+
+    and use some zero to fill this and move on...
+
+    and empty all the zeroes till now..
+
+    and then move on..
+
+    if you dont have enough any zeroes left..
+
+    then gg : false and break..
+
+    1,0,1,1
+    2,0,2,5
+    2,2,4,11
+
+
+    2,10,5
+    2,2,17
+
+
+*/
+signed main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int t;
+    cin >> t;
+    while (t--)
+    {
+        int n;
+        cin >> n;
+        string s;
+        cin >> s;
+        vector<int> arr(n), c(n);
+        for (int i = 0; i < n; i++)
+        {
+            cin >> arr[i];
+        }
+        for (int i = 0; i < n; i++)
+        {
+            cin >> c[i];
+        }
+        // for (auto a : c)
+        //     cout << a << ' ';
+        // cout << endl;
+        bool ok = 1;
+        if ((s[0] == '1') && (arr[0] != c[0]))
+        {
+
+            ok = false;
+        }
+        int temp = c[0];
+        for (int i = 0; i < n; i++)
+        {
+            if (c[i] < temp)
+            {
+                ok = false;
+                break;
+            }
+            temp = max(temp, c[i]);
+        }
+        if (ok == false)
+        {
+
+            cout << "No" << endl;
+            continue;
+        }
+
+        vector<int> zeroes;
+        arr[0] = c[0];
+
+        int prefix_sum = arr[0];
+        int max_seen = arr[0];
+        vector<int> prefix(n);
+        prefix[0] = arr[0];
+
+        for (int i = 1; i < n; i++)
+        {
+            cout << i << ":" << prefix_sum << ":" << max_seen << endl;
+            if (s[i] == '1')
+            {
+                prefix_sum += arr[i];
+            }
+            else
+            {
+                zeroes.push_back(i);
+            }
+            prefix[i] = prefix_sum;
+            max_seen = max(max_seen, prefix_sum);
+            // cout << prefix_sum << ":" << max_seen << ":" << i << endl;
+            if (s[i] == '1')
+            {
+                // i need to clear all the prev things..
+                if (max_seen != c[i])
+                {
+                    // then we need to change things..
+                    if (zeroes.empty())
+                    {
+
+                        ok = false;
+                        break;
+                    }
+                    // i will use some zero to make up..
+                    int idx = zeroes.back();
+                    int x = c[i] - prefix[i];
+                    if ((prefix[idx] + x) > c[idx])
+                    {
+                        ok = false;
+                        break;
+                    }
+                    arr[idx] = x;
+                    prefix[i] += x;
+                }
+                zeroes.clear();
+            }
+            else
+            {
+
+                if (max_seen != c[i])
+                {
+                    int idx = zeroes.back();
+                    int x = c[i] - prefix[i];
+                    if ((prefix[idx] + x) > c[idx])
+                    {
+
+                        ok = false;
+                        break;
+                    }
+                    arr[idx] = x;
+                    prefix[i] += x;
+                    zeroes.clear();
+                }
+            }
+
+            max_seen = max(max_seen, prefix_sum);
+        }
+        if (ok == false)
+        {
+            cout << "No" << endl;
+            for (auto a : arr)
+                cout << a << ' ';
+            cout << endl;
+        }
+        else
+        {
+            cout << "Yes" << endl;
+            for (auto a : arr)
+                cout << a << " ";
+            cout << endl;
+        }
+    }
+    return 0;
+}
