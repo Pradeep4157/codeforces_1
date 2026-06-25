@@ -211,114 +211,74 @@ signed main()
                 continue;
             if ((first[left] == first[right]) && (second[left] == second[right]))
                 continue;
-            if (first[left] != first[right])
-            {
-                if (ms.count(first[left]))
-                {
-                    if (second[left] == -1)
-                    {
-                        // then we can assume that that first[left] was connected to this and now its gone, so only if second[right] == -1 || second[right] == first[right]..
-                        if (first[right] == second[right])
-                        {
-                            auto it = ms.lower_bound(first[left]);
-                            if (it != ms.end())
-                            {
-                                ms.erase(it);
-                            }
-                        }
-                        else if (second[right] == -1)
-                        {
-                            auto it = ms.lower_bound(first[left]);
-                            if (it != ms.end())
-                            {
-                                ms.erase(it);
-                            }
-                            ms.insert(first[right]);
-                        }
-                        else
-                        {
-                            // no one can save first[right] so false..
-                            ok = false;
-                            break;
-                        }
+            if(second[left] == -1){
+                // first[left] was connected to this.. or it was conected to someone else..
+                if(ms.count(first[left])){
+                    // now second[right] should satisfy with first[right]..
+                    auto it = ms.lower_bound(first[left]);
+                    if(it != ms.end()){
+                        ms.erase(it);
+                    }
+                    if(second[right] == first[right]){
                         continue;
                     }
-
-                    // we can connect that to first[right], but this second[right]
-                    // if ((second[left] == second[right]))
-                    // {
-                    //     // then only it is possible..
-                    //     auto it = ms.lower_bound(first[left]);
-                    //     if (it != ms.end())
-                    //     {
-                    //         ms.erase(it);
-                    //         ms.insert(first[right]);
-                    //         continue;
-                    //     }
-                    // }
-                    // else if(second[left] == -1){
-
-                    // }
-                    // else if(second[right] == -1){
-
-                    // }
-                    // else
-                    // {
-                    //     ok = false;
-                    //     break;
-                    // }
+                    else if(second[right] == -1){
+                        ms.insert(first[right]);
+                        continue;
+                    }
+                    else{
+                        ok = false;
+                        break;
+                    }
                 }
-                if (second[left] != second[right])
-                {
-
-                    ok = false;
-                    break;
+                else{
+                    // -1 was connected to someone else now that nigga should be connected to second[right]..
+                    if(first[left] != first[right]){
+                        ok = false;
+                        break;
+                    }
+                    if(second[right] == -1){
+                        continue;
+                    }
+                    if(!ms.count(second[right])){
+                        ok = false;
+                        break;
+                    }
+                    else{
+                        auto it = ms.lower_bound(second[right]);
+                        if(it != ms.end()){
+                            ms.erase(it);
+                        }
+                    }
                 }
-                if (second[left] != -1)
-                {
-
-                    ok = false;
-                    break;
-                }
-                // now left might be dependent on this or might not be..
-                //  if it was not dependent on this -1 then there was some arr[left] in this and since b[right] is not arr[left] so that will be left handing..
-                if (!ms.count(first[left]))
-                {
-
-                    ok = false;
-                    break;
-                }
-                auto it = ms.lower_bound(first[left]);
-                if (it != ms.end())
-                {
-                    ms.erase(it);
-                }
-                // now arr[right] is dependent on -1 on arr[right]..
-                ms.insert(first[right]);
             }
-            if (second[right] == -1)
-            {
-                ms.insert(second[left]);
-            }
-            else
-            {
-                if (second[left] != -1)
-                {
-                    ok = false;
-                    break;
+            else{
+                if(first[left] == second[left]){
+                    // first right should be connected to second[right]..
+                    if(second[right] == -1){
+                        ms.insert(first[right]);
+                        continue;
+                    }
+                    else if(second[right] == first[right]) continue;
+                    else{
+                        ok = false;
+                        break;
+                    }
+                    
                 }
-                if (!ms.count(second[right]))
-                {
-                    ok = false;
-                    break;
+                else{
+                    if(ms.count(first[left])){
+                        auto it = ms.lower_bound(first[left]);
+                        ms.erase(it);
+                        ms.insert(first[right]);
+                        
+                    }
+                    else{
+                        ok = false;
+                        break;
+                    }
                 }
-                // now it got a pair that  is not -1..
-                // so we will remove it from ms..
-                auto it = ms.find(second[right]);
-                if (it != ms.end())
-                {
-                    ms.erase(it);
-                }
+
             }
         }
         cout << ((ok) ? "YES" : "NO") << endl;

@@ -75,6 +75,28 @@ using namespace std;
     2,2,17
 
 
+    instead of  filling all the values with some x values  ..
+
+        there are  some pivots..
+
+            we just need to satisfy them using prev zero..
+
+                if i have 1 prev zero i will use that and satisfy this pivot
+
+                    else its not possible..
+
+    WHAT ARE THE PIVOTS :
+
+        c[i] where c[i] > c[i - 1]...
+
+        or where b[i] > c[i]
+
+
+
+
+
+
+
 */
 signed main()
 {
@@ -97,9 +119,7 @@ signed main()
         {
             cin >> c[i];
         }
-        // for (auto a : c)
-        //     cout << a << ' ';
-        // cout << endl;
+
         bool ok = 1;
         if ((s[0] == '1') && (arr[0] != c[0]))
         {
@@ -123,7 +143,7 @@ signed main()
             continue;
         }
 
-        vector<int> zeroes;
+        int prev_zero = -1;
         arr[0] = c[0];
 
         int prefix_sum = arr[0];
@@ -133,49 +153,73 @@ signed main()
 
         for (int i = 1; i < n; i++)
         {
-            cout << i << ":" << prefix_sum << ":" << max_seen << endl;
+
             if (s[i] == '1')
             {
                 prefix_sum += arr[i];
             }
             else
             {
-                zeroes.push_back(i);
+                prev_zero = i;
             }
             prefix[i] = prefix_sum;
             max_seen = max(max_seen, prefix_sum);
+
             // cout << prefix_sum << ":" << max_seen << ":" << i << endl;
             if (s[i] == '1')
             {
+
                 // i need to clear all the prev things..
-                if (max_seen != c[i])
+                if (max_seen < c[i])
                 {
                     // then we need to change things..
-                    if (zeroes.empty())
+                    if (prev_zero == -1)
                     {
-
                         ok = false;
                         break;
                     }
                     // i will use some zero to make up..
-                    int idx = zeroes.back();
+                    int idx = prev_zero;
                     int x = c[i] - prefix[i];
                     if ((prefix[idx] + x) > c[idx])
                     {
+
                         ok = false;
                         break;
                     }
                     arr[idx] = x;
                     prefix[i] += x;
+                    prefix_sum += x;
+                    prev_zero = -1;
                 }
-                zeroes.clear();
+                else if (max_seen > c[i])
+                {
+                    if (prev_zero == -1)
+                    {
+                        ok = false;
+                        break;
+                    }
+                    // i will use some zero to make up..
+                    int idx = prev_zero;
+                    int x = c[i] - prefix[i];
+                    if ((prefix[idx] + x) > c[idx])
+                    {
+
+                        ok = false;
+                        break;
+                    }
+                    arr[idx] = x;
+                    prefix[i] += x;
+                    prefix_sum += x;
+                    prev_zero = -1;
+                }
             }
             else
             {
 
-                if (max_seen != c[i])
+                if (max_seen < c[i])
                 {
-                    int idx = zeroes.back();
+                    int idx = prev_zero;
                     int x = c[i] - prefix[i];
                     if ((prefix[idx] + x) > c[idx])
                     {
@@ -185,7 +229,24 @@ signed main()
                     }
                     arr[idx] = x;
                     prefix[i] += x;
-                    zeroes.clear();
+                    prefix_sum += x;
+                    prev_zero = -1;
+                }
+                else if (max_seen > c[i])
+                {
+                    // i will use some zero to make up..
+                    int idx = prev_zero;
+                    int x = c[i] - prefix[i];
+                    if ((prefix[idx] + x) > c[idx])
+                    {
+
+                        ok = false;
+                        break;
+                    }
+                    arr[idx] = x;
+                    prefix[i] += x;
+                    prefix_sum += x;
+                    prev_zero = -1;
                 }
             }
 
@@ -194,9 +255,9 @@ signed main()
         if (ok == false)
         {
             cout << "No" << endl;
-            for (auto a : arr)
-                cout << a << ' ';
-            cout << endl;
+            // for (auto a : arr)
+            //     cout << a << ' ';
+            // cout << endl;
         }
         else
         {

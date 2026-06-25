@@ -4,78 +4,130 @@ using namespace std;
 /*
         OBSERVATIONS:
 
-    i can think in 2 directions :
+    n elements and arr[i] <= m
 
-        either i decide what value should i make of arr[i]..
+    all the adj elements should not be co prime..
 
-        or i decide what value should i add to this arr[i]..
+    but the gcd of whole array should be 1..
 
-        i should also keep track of what i add prev..
+    so obv no arr[i] == 1..
 
-        WHAT ARE THE BOUNDS :
-
-            i) values of arr[i] are going to be from 0..k - 1
-
-            ii) subarrays can be from 1..n
-
-        i greedily try to make this ele as small as i can
-
-        from 0...k - 1
-
-        to achieve this value x :
-
-            if x is greater i will have to add x - arr[i] or 2 * (x - arr[i]) or 3 * (x - arr[i])..
-
-            whatever values present..
-
-            also if prev addition allows then will do that..
-
-            so end of this loop is going to be 0...(arr[i] + prev) % k
+    let say i put any value from 2...m as arr[0]..
 
 
-            if zero then try something..
 
-            but this is also structurally not correct because i am not considering
+    2,2
+    2,4
+    2,6
+    4,2
+    6,2
 
-            completing all the subarrays from 1..max that i used..
+    for all n >= 2 ..
 
+        the main condition is that first and last element should be co prime and all the middle elements should have factor of first and last elements.
 
-    i will have to keep track of no of same subarrays that i can make
-
-    as well..
-
-    if there are 2 choices :
-
-        i) merge with prev idx.
-
-        ii) choose some x subarray both give same res..
-
-        which one should i choose ?
-
-        -> if x <= max choosen so far then yes ?
-
-        -> if x > max then try to merge because that just increases the no of subarrays
-
-        that we need to make ?
-
-        i will also need the track of lines i have added so far...
+        so we can rearrange these middle elements however we want,
 
 
-    k = 5, arr[i] = 3 i want to make it 4..
+            what are going to be in middle :
 
-    i can add 1,6,10,
+                so the count of middle elements is going to be :
 
+                    cnt = m / left * right
+
+                and since we can rearrarge these elements however we want and can take any number of these element..
+
+                    so the possibilities for each position = cnt
+
+                res += positions ^ cnt
+
+
+    i cant simply use left * right as min number , we can start lower than that..
+
+    should the middle elements have all the factors of left and right or even if only some are present then its fine ?
+
+        Eg : left = 6 (2, 3) , right = 35(5, 7)
+
+        now if the middl is 10 that also works ..
+
+    so the range of elements increases..
+
+    the range can include :
+
+        i take any non empty subsequence of prime factors from left and any set of non empty subsequence from right and add that to possiblities..
+
+        what's the max number of prime factors each will have :
+
+            2 * 3 * 5 , 7 * 9
+                        7,3
+
+            at max there are going to be 21 combinations..
+
+                so combinations are way too low since both cannot have any common thing :
+
+            but this might also cause some overlap ...
+
+                lets say i take 2, 7 = {14, 28, 42, 56, }
+
+            instead what i can do is that :
+
+                iterate from 1...m :
+
+                    if the number has some factor that is in both the set then yes  else no..
+
+
+
+
+                [2,6,3]
+                [2,12,3]
+                [2,10,5]
+                [2,6,9]
+                [2,12,9]
+                [3,6,2]
+                [3,12,2]
+                [3,6,4]
+                [3,12,4]
+                [3,6,8]
+                [3,12,8]
+                [3,6,10]
+                [3,12,10]
+                [4,6,3]
+                [4,12,3]
+
+
+
+
+                263141891
+                877339567
+
+        
+    6,10,21,35
+
+        so some factor which i select should be present in all the mid elemnents...
+
+    
 
 
 */
-bool find(int left, int subarays_to_make)
+
+int n, m;
+
+const int mod = 998244353;
+int binpow(int a, int b)
 {
-    // since i am cutting at i - 1 so.
-    subarrays_to_make--;
-    // also i cant cut after n - 1..
-    left--;
-    return (left >= subarays_to_make);
+    int res = 1;
+    while (b > 0)
+    {
+        if (b & 1)
+        {
+            res = (1LL * res * a) % mod;
+        }
+        a = (1LL * a * a) % mod;
+        b >>= 1;
+    }
+    return res;
 }
+
 signed main()
 {
     ios::sync_with_stdio(false);
@@ -84,53 +136,54 @@ signed main()
     cin >> t;
     while (t--)
     {
-        int n, k;
-        cin >> n >> k;
-        vector<int> arr(n);
-        for (int i = 0; i < n; i++)
+        cin >> n >> m;
+        if (n == 1)
         {
-            cin >> arr[i];
+            cout << 1 << endl;
+            continue;
         }
 
-        int max_sub = 1;
-        int partitions = 0;
-        int prev = -1;
-        vector<int> res;
-        set<int> st;
-        for (int i = 0; i < n; i++)
+        int res = 0;
+        vector<int> power_dp(m + 1);
+        for (int i = 0; i <= m; i++)
         {
-            st.insert(i);
+            int curr = binpow(i, n - 2);
+            curr %= mod;
+            power_dp[i] = curr;
         }
-        for (int i = 0; i < n; i++)
+        for (int left = 1; left <= m; left++)
         {
-            if (i == 0)
+            for (int right = 1; right <= m; right++)
             {
-                for (int j = 0; j < k; j++)
+                int curr_gcd = __gcd(left, right);
+                if (curr_gcd != 1)
+                    continue;
+                int curr = 0;
+                int cnt = 0;
+                for (int ele = 1; ele <= m; ele++)
                 {
-                    // is this one possible..
-                    if (j >= arr[i])
-                    {
-                        // we can try to just add
-                        int diff = j - arr[i];
-                        if (st.count(diff))
-                        {
-                            // we can make >= diff subarrays or not we will have to check..
-                            bool possi_check = find(n - i, max(max_sub, diff + 1) - partitions);
-                            if (possi_check)
-                            {
-                                res[i] = j;
-                                st.erase(diff);
-                                partitions++;
-                                max_sub = max(max_sub, diff + 1);
-                                break;
-                            }
-                        }
-                    }
-                    // the flow of j < arr[i] and j >= arr[i] has only 1 diff step..
+                    bool left_found = false, right_found = false;
+                    if (__gcd(left, ele) > 1)
+                        left_found = 1;
+                    if (__gcd(right, ele) > 1)
+                        right_found = 1;
+                    if (left_found && right_found)
+                        cnt++;
                 }
+                if (n == 2)
+                {
+                    // since there is no middle element there is only 1 way that there's nothing between and left on left and right on right..
+                    res++;
+                    res %= mod;
+                    continue;
+                }
+                curr = power_dp[cnt];
+                res += curr;
+                res %= mod;
             }
-            // zero is processed in a diff way so that we keep track of pos left with making paritions at i - 1 gap.
         }
+        res %= mod;
+        cout << res << endl;
     }
     return 0;
 }
